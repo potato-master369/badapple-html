@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>BAD APPLE!!!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cousine:wght@700&display=swap');
+
+        pre {
+            font-family: "Cousine", monospace;
+            font-weight: 700;
+            line-height: 0.6;
+        }
+
+        canvas,
+        video {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <video id="badapple" muted autoplay playsinline>
+        <source src="data:video/mp4;base64,{{ video_content }}" type="video/mp4">
+    </video>
+    <canvas id="toblit"></canvas>
+    <h1>Bad Apple!! for HTML text</h1>
+    <cite>Made by: YT @WompWomp1234-j6c/GH: potato-master369</cite>
+    <pre id="fb">Seeing this text means the render has not initialised.</pre>
+    <p>NOTE: this file is heavily compressed so some artifacts may be observed. Consider subscribing to <a href='https://www.youtube.com/@wompwomp1234-j6c'>My YouTube Channel</a> to support the project.</p>
+    <h2>Extra instructions</h2>
+    <ul>
+        <li>For the best experience, an internet connection is required to download the font needed for the frame to appear as intended. This however, works fine with the system monospace font, but is less pretty.</li>
+        <li>To view the video again once you're done or just reset you can simply refresh this page. That wouldve been another 3 lines of JS im too lazy to write.</li>
+        <li>If the thing shows the "renderer has not started" message, try checking if your browser supports h.264, your computer is powerful enough to run this, and that you have enough RAM.</li>
+        <li>Maybe, you might not belive this is real text. In that case, select the frame, copy the text on it, and paste it into your text editor. I genuinely hate when people doubt these kinds of things.</li>
+    </ul>
+    <h2>Acknowledgements</h2>
+    <p>This project was made possible by the following additional software:</p>
+    <ul>
+        <li>FFMpeg</li>
+        <li>Python 3</li>
+        <li>Jinja 2</li>
+    </ul>
+    <script>
+        window.onload = () => {
+            const video = document.getElementById('badapple');
+            const canvas = document.getElementById('toblit');
+            const ctx = canvas.getContext('2d');
+            const frameRate = 15; // target fps
+            const frameDuration = 1000 / frameRate; // ms per frame
+            let intervalId;
+
+            function convertToAscii(imageData, width, height) {
+                const pixels = imageData.data;
+                const chars = "\u2588@#%*+=-:. ";
+                let output = "";
+
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const i = (y * width + x) * 4;
+                        const brightness = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+                        const charIndex = Math.floor(brightness / 256 * chars.length);
+                        output += chars[charIndex];
+                    }
+                    output += "\n";
+                }
+                return output;
+            }
+
+            function renderFrame() {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const asciiFrame = convertToAscii(imageData, canvas.width, canvas.height);
+                document.getElementById("fb").textContent = asciiFrame;
+            }
+
+            video.addEventListener('loadeddata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                // Start playback muted and hidden
+                video.play();
+
+                // Kick off ASCII rendering loop
+                intervalId = setInterval(() => {
+                    if (video.currentTime >= video.duration) {
+                        clearInterval(intervalId);
+                        console.log("Finished extracting all frames.");
+                        return;
+                    }
+                    renderFrame();
+                }, frameDuration);
+            });
+        };
+    </script>
+
+</body>
+
+</html>
